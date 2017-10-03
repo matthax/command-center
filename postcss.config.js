@@ -1,3 +1,6 @@
+const rt_variables = {
+  '--button-neutral-color-contrast': '#fff',
+};
 module.exports = {
   plugins: {
     'postcss-import': {
@@ -5,6 +8,12 @@ module.exports = {
     },
     'postcss-mixins': {},
     'postcss-each': {},
-    'postcss-cssnext': {}
+    'postcss-cssnext': {
+      features: {
+        customProperties: {
+          variables: rt_variables,
+        },
+      },
+    },
   },
 };

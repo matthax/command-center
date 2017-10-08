@@ -3,6 +3,7 @@ import { withData } from '../hoc';
 import { List, ListItem, ListSubHeader, ListDivider, ListCheckbox } from 'react-toolbox/lib/list';
 import Dialog from 'react-toolbox/lib/dialog';
 import { Button } from 'react-toolbox/lib/button';
+import { MediaPlayer } from './players';
 
 class MusicFactory extends React.Component {
   state = {
@@ -36,10 +37,7 @@ class MusicFactory extends React.Component {
           onOverlayClick={this.handleToggle}
           title='Media Test'
         >
-        <audio controls>
-            <source src={`/api/player/audio/${encodeURIComponent(song)}`} type="audio/mpeg" />
-            Your browser does not support the audio element.
-        </audio>
+        <MediaPlayer poster={"/api/images/gta.jpg"} src={`/api/player/audio/${encodeURIComponent(song)}`} type="audio/mpeg" />
         </Dialog> : null }
       </section>
     )

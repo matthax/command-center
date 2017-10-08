@@ -1,8 +1,15 @@
-@import "react-toolbox/lib/button/theme.css";
-
-.button {
-  background-color: var(--palette-green-700) !important;
+.videoControls {
+  position: absolute;
+  top:160px;
+  opacity: 0;
+  transition-delay: 20ms;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
 }
+.cardMedia:hover .videoControls {
+  opacity: 1;
+}
+
 .play {
   position:absolute;
   right: 10px;

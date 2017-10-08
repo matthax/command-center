@@ -2,11 +2,10 @@ import React from 'react';
 import { Card, CardMedia, CardTitle, CardText, CardActions } from 'react-toolbox/lib/card';
 import { Button } from 'react-toolbox/lib/button';
 import Slider from 'react-toolbox/lib/slider';
-import theme from './SuccessButton.css';
+import theme from './theme.css';
 import classnames from 'classnames';
 
-// const SuccessButton = (props) => <Button {...props} theme={theme} />;
-class SuccessButton extends React.Component {
+class AudioPlayer extends React.Component {
   state = {
     seek: 0,
     time: 0,
@@ -100,4 +99,4 @@ class SuccessButton extends React.Component {
     )
   }
 };
-export default SuccessButton;
+export default AudioPlayer;

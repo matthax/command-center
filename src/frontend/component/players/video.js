@@ -2,11 +2,10 @@ import React from 'react';
 import { Card, CardMedia, CardTitle, CardText, CardActions } from 'react-toolbox/lib/card';
 import { Button } from 'react-toolbox/lib/button';
 import Slider from 'react-toolbox/lib/slider';
-import theme from './SuccessButton.css';
+import theme from './theme.css';
 import classnames from 'classnames';
 
-// const SuccessButton = (props) => <Button {...props} theme={theme} />;
-class SuccessButton extends React.Component {
+class VideoPlayer extends React.Component {
   state = {
     seek: 0,
     time: 0,
@@ -25,26 +24,26 @@ class SuccessButton extends React.Component {
   handleDragStop = () => {
     console.log('drag ended');
     this.setState({ seeking: false, time: this.state.seek }, () => {
-      this.audio.currentTime = this.state.seek;
+      this.video.currentTime = this.state.seek;
     });
   };
   handleClick = () => {
     var playing = !this.state.playing;
     this.setState({ playing: playing }, () => {
-      if (playing) { console.log('hit play'); this.audio.play(); }
-      else { console.log('hit pause'); this.audio.pause(); }
+      if (playing) { console.log('hit play'); this.video.play(); }
+      else { console.log('hit pause'); this.video.pause(); }
     });
   };
   handleDurationChange = () => {
-    console.log('duration', this.audio.duration);
-    this.setState({length: this.audio.duration});
+    console.log('duration', this.video.duration);
+    this.setState({length: this.video.duration});
   };
   handleStalled = () => {
     console.log('stalled');
   };
   handleTimeUpdate = () => {
-    console.log('seek', this.audio.currentTime);
-    const time = this.audio.currentTime;
+    console.log('seek', this.video.currentTime);
+    const time = this.video.currentTime;
     if (this.state.seeking) this.setState({ time });
     else this.setState({ time, seek: time });
   };
@@ -52,7 +51,7 @@ class SuccessButton extends React.Component {
     console.log('play');
   };
   handleEnded = () => {
-    this.audio.pause();
+    this.video.pause();
     this.setState({playing: false, time: 0, seek: 0});
     console.log('ended');
   };
@@ -63,23 +62,23 @@ class SuccessButton extends React.Component {
     console.log('pause');
   };
   setref = (audio) => {
-    this.audio = audio;
+    this.video = audio;
     // const { playing } = this.state;
-    // if (playing && this.audio) this.audio.play();
+    // if (playing && this.video) this.video.play();
   };
   componentDidMount = () => {
     // const { playing } = this.state;
-    // if (playing && this.audio) this.audio.play();
+    // if (playing && this.video) this.video.play();
   };
   render() {
     const { seek, time, volume, length, muted, playing, seeking } = this.state;
+    const width = '350px'
     return (
     <section>
-      <Card style={{width: '350px', position: 'relative'}}>
-        <CardMedia
-        aspectRatio="wide"
-        image="/api/images/gta.jpg"
-        />
+      <Card style={{width: width, position: 'relative'}}>
+        <CardMedia>
+          <video src={'/api/player/video/LittleBitOfThis'} style={{width: width}} ref={this.setref} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} />
+        </CardMedia>
         <CardTitle
           title="Little Bit of This"
           subtitle="Good Times Ahead - Vince Staples"
@@ -93,11 +92,10 @@ class SuccessButton extends React.Component {
           <div className={theme.bar} />
           <div className={theme.bar} />
         </div>
-        <audio src={'/api/player/audio/LittleBitOfThis'} ref={this.setref} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} />
         <Slider value={seek} onChange={this.handleSeek} min={0} max={length} onDragStart={this.handleDragStart} onDragStop={this.handleDragStop} />
       </Card>
       </section>
     )
   }
 };
-export default SuccessButton;
+export default VideoPlayer;

@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom';
 import App from './component/App';
 import { AppContainer } from 'react-hot-loader';
 import { overrideComponentTypeChecker } from 'react-toolbox';
+import { BrowserRouter } from 'react-router-dom';
 
 const rootEl = document.getElementById('app');
 
 const render = () => {
   ReactDOM.render(
     <AppContainer>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </AppContainer>,
     rootEl
   );

@@ -19,6 +19,17 @@ const player = (root) => {
     }
     
   });
+  router.get('/video/:file', function(req, res, next) {
+    try {
+      const fullpath = path.join(video, req.params.file);
+      console.log(req.params.file, fullpath);
+      ms.pipe(req, res, fullpath);
+    }
+    catch (err) {
+      res.send({error: err.message});
+    }
+    
+  });
   return router;
 };
 

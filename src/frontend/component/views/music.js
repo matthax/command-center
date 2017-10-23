@@ -3,7 +3,7 @@ import { withData } from '../hoc';
 import { List, ListItem, ListSubHeader, ListDivider, ListCheckbox } from 'react-toolbox/lib/list';
 import Dialog from 'react-toolbox/lib/dialog';
 import { Button } from 'react-toolbox/lib/button';
-import { MediaPlayer } from './players';
+import { MediaPlayer } from '../players';
 
 class MusicFactory extends React.Component {
   state = {
@@ -28,7 +28,10 @@ class MusicFactory extends React.Component {
       <section style={{ padding: 20 }}>
         <List selectable ripple>
         <ListSubHeader caption={data ? 'Music' : 'Loading Music Library'} />
-          { data && data.files ? data.files.map((file, index) => (<ListItem selectable ripple key={`media_${index}`} caption={file} leftIcon='play' onClick={(e) => { this.handleClick(file); }}/>)) : null }
+          { data && data.files ? data.files.map(({ file, playable, created, isDirectory, isFile, tag }, index) => {
+            const tags = tag && tag.tags ? tag.tags : {};
+            return (<ListItem selectable ripple key={`media_${index}`} caption={tags.title || file} legend={tags && tags.artist ? `${tags.artist} - ${tags.album || ''}` : created} leftIcon={playable ? 'play_arrow' : (isDirectory ? 'folder' : (isFile ? 'insert_drive_file' : 'help'))} onClick={(e) => { this.handleClick(file); }}/>)
+          }) : null }
         </List>
         { active && song ? <Dialog
           actions={this.actions}

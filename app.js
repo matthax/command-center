@@ -4,11 +4,17 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const passport = require('passport');
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var files = require('./routes/files');
 var player = require('./routes/player');
+var sonos = require('./routes/sonos');
+var spotify = require('./routes/spotify');
+
+const User = require('./models/user');
 
 var app = express();
 
@@ -23,11 +29,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize());
 
 app.use('/', index);
 app.use('/users', users);
 app.use('/files', files(path.join(__dirname, 'filestore')));
 app.use('/player', player(path.join(__dirname, 'filestore')));
+app.use('/sonos', sonos('192.168.1.57', 1400));
+app.use('/spotify', spotify);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

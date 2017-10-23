@@ -5,24 +5,29 @@ import FontIcon from 'react-toolbox/lib/font_icon';
 import Slider from 'react-toolbox/lib/slider';
 import theme from './theme.css';
 import classnames from 'classnames';
+import ReactDOM from 'react-dom';
+import { isFullscreen, exitFullscreen, fullscreen } from '../utils/fullscreen';
 
 const isAudio = (file) => {
-  return file.toLocaleLowerCase().endsWith('.mp3');
+  return file && file.toLocaleLowerCase().endsWith('.mp3');
 };
 const isVideo = (file) => {
-  return file.toLocaleLowerCase().endsWith('.mp4');
+  return file && file.toLocaleLowerCase().endsWith('.mp4');
 };
 
 class MediaPlayer extends React.Component {
-  state = {
-    seek: 0,
-    time: 0,
-    volume: 0,
-    length: 0,
-    fullscreen: false,
-    seeking: false,
-    playing: false,
-    muted: false,
+  constructor(props) {
+    super(props);
+    this.state = {
+      seek: props.time || 0,
+      time: props.time || 0,
+      volume: 0,
+      length: props.duration || 0,
+      fullscreen: false,
+      seeking: false,
+      playing: props.playing || false,
+      muted: false,
+    };
   };
   handleSeek = (seek) => {
       this.setState({ seek });
@@ -31,34 +36,45 @@ class MediaPlayer extends React.Component {
     this.setState({ seeking: true });
   };
   handleDragStop = () => {
-    console.log('drag ended');
     this.setState({ seeking: false, time: this.state.seek }, () => {
       this.media.currentTime = this.state.seek;
     });
   };
   handleClick = () => {
+    const { onPlay, onPause } = this.props;
     var playing = !this.state.playing;
     this.setState({ playing: playing }, () => {
-      if (playing) { console.log('hit play'); this.media.play(); }
-      else { console.log('hit pause'); this.media.pause(); }
+      if (playing) { 
+        if (this.media) this.media.play(); 
+        if (onPlay) { onPlay(); } 
+      }
+      else { 
+        if (this.media) this.media.pause(); 
+        if (onPause) { onPause(); } 
+      }
     });
   };
   handleDurationChange = () => {
-    console.log('duration', this.media.duration);
     this.setState({length: this.media.duration});
   };
   handleStalled = () => {
     console.log('stalled');
   };
   handleTimeUpdate = () => {
-    console.log('seek', this.media.currentTime);
     const time = this.media.currentTime;
     if (this.state.seeking) this.setState({ time });
     else this.setState({ time, seek: time });
   };
   handleFullscreenClick = () => {
-    this.setState({fullscreen: !this.state.fullscreen});
+    this.setState({fullscreen: !this.state.fullscreen}, () => {
+      const cardMedia = ReactDOM.findDOMNode(this.cardMedia);
+      if (this.state.fullscreen && !isFullscreen()) fullscreen(cardMedia);
+      else if (!this.state.fullscreen && isFullscreen()) exitFullscreen(cardMedia);
+    });
   };
+  handleFullscreenExit = () => {
+    this.setState({fullscreen: isFullscreen()});
+  }
   handlePlay = () => {
     console.log('play');
   };
@@ -73,7 +89,10 @@ class MediaPlayer extends React.Component {
   handlePause = () => {
     console.log('pause');
   };
-  setref = (media) => {
+  setCardMediaRef = (cardMedia) => {
+    this.cardMedia = cardMedia;
+  };
+  setMediaRef = (media) => {
     this.media = media;
     // const { playing } = this.state;
     // if (playing && this.media) this.media.play();
@@ -81,39 +100,63 @@ class MediaPlayer extends React.Component {
   componentDidMount = () => {
     // const { playing } = this.state;
     // if (playing && this.media) this.media.play();
+    if (document.addEventListener)
+    {
+        document.addEventListener('webkitfullscreenchange', this.handleFullscreenExit, false);
+        document.addEventListener('mozfullscreenchange', this.handleFullscreenExit, false);
+        document.addEventListener('fullscreenchange', this.handleFullscreenExit, false);
+        document.addEventListener('MSFullscreenChange', this.handleFullscreenExit, false);
+    }
+  };
+  componentWillUnmount = () => {
+    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenExit);
+    document.removeEventListener('mozfullscreenchange', this.handleFullscreenExit);
+    document.removeEventListener('fullscreenchange', this.handleFullscreenExit);
+    document.removeEventListener('MSFullscreenChange', this.handleFullscreenExit);
+  };
+  componentWillReceiveProps = (nextProps) => {
+    const { playing, duration, poster, title, subtitle } = nextProps;
+    if (playing != this.state.playing || duration != this.state.length) {
+      this.setState({playing: playing, length: duration});
+    }
   };
   render() {
     const { seek, time, volume, length, muted, playing, seeking, fullscreen } = this.state;
-    const { src, poster } = this.props;
-    const isAudioFile = isAudio(src);
+    const { src, poster, title, subtitle, video, sonos, onPlay, onPause, ...rest } = this.props;
+    const isAudioFile = typeof video === 'undefined' ? (typeof sonos === 'undefined' ? isAudio(src) : true) : !video;
     const width = '350px';
     return (
     <section>
       <Card style={{width: width, position: 'relative'}}>
         { isAudioFile ? <CardMedia
-        aspectRatio="wide"
+        aspectRatio="square"
         image={poster}
         /> : 
-        <CardMedia className={theme.cardMedia}>
-          <video src={'/api/player/video/LittleBitOfThis'} style={{width: width}} ref={this.setref} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} />
-          { !isAudioFile ? <div className={theme.videoControls}><IconButton icon={ playing ? 'pause' : 'play_arrow'} onClick={this.handleClick} /> <IconButton icon={fullscreen ? 'fullscreen_exit' : 'fullscreen'} onClick={this.handleFullscreenClick} /></div>: null }
+        <CardMedia className={classnames(theme.cardMedia, { [theme.fullscreen]: fullscreen })} ref={this.setCardMediaRef}>
+          <video src={src} style={ fullscreen ? {} : {width: width}} ref={this.setMediaRef} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} onClick={this.handleClick} {...rest} />
+          { !isAudioFile ? 
+          <div className={theme.videoControls}>
+            { fullscreen ? <IconButton icon={ playing ? 'pause' : 'play_arrow'} onClick={this.handleClick} className={theme.videoPlayButton} /> : null }
+            <IconButton icon={fullscreen ? 'fullscreen_exit' : 'fullscreen'} onClick={this.handleFullscreenClick} className={theme.fullscreenButton} />
+            { fullscreen ? <Slider value={seek} onChange={this.handleSeek} min={0} max={length} onDragStart={this.handleDragStart} onDragStop={this.handleDragStop} className={theme.videoSlider} /> : null }
+          </div> : null }
         </CardMedia>
         }
         <CardTitle
-          title="Little Bit of This"
-          subtitle="Good Times Ahead - Vince Staples"
+          title={title}
+          subtitle={subtitle}
         />
         <Button icon={ playing ? 'pause' : 'play_arrow'} floating accent mini onClick={this.handleClick} className={theme.play} />
-        <div className={classnames(theme.equalizer, { [theme.playing]: playing })}>
+        { isAudioFile ? <div className={classnames(theme.equalizer, { [theme.playing]: playing })}>
           <div className={theme.bar} />
           <div className={theme.bar} />
           <div className={theme.bar} />
           <div className={theme.bar} />
           <div className={theme.bar} />
           <div className={theme.bar} />
-        </div>
-        { isAudioFile ? <audio src={src} ref={this.setref} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} /> : null }
-        <Slider value={seek} onChange={this.handleSeek} min={0} max={length} onDragStart={this.handleDragStart} onDragStop={this.handleDragStop} />
+        </div> : null }
+        { isAudioFile && !sonos ? <audio src={src} ref={this.setMediaRef} onPlay={this.handlePlay} onPause={this.handlePause} onStalled={this.handleStalled} onEnded={this.handleEnded} onPlaying={this.handlePlaying} onTimeUpdate={this.handleTimeUpdate} onDurationChange={this.handleDurationChange} {...rest} /> : null }
+        { !fullscreen ? <Slider value={seek} onChange={this.handleSeek} min={0} max={length} onDragStart={this.handleDragStart} onDragStop={this.handleDragStop} /> : null }
       </Card>
       </section>
     )

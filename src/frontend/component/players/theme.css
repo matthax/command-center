@@ -1,10 +1,54 @@
+.fullscreen .videoControls {
+  bottom: 0;
+}
 .videoControls {
   position: absolute;
-  top:160px;
+  top:140px;
+  right: 0;
+  left: 0;
   opacity: 0;
   transition-delay: 20ms;
   transition-duration: 200ms;
   transition-timing-function: ease-out;
+}
+.cardMedia {
+  position: relative;
+}
+.cardMedia.fullscreen {
+  width: 100%;
+  width: 100vw;
+  height: auto;
+}
+.videoSlider {
+  /* padding: 0 1.5em; */
+  position: absolute;
+  bottom: 2em;
+  right: 1em;
+  left: 1em;
+  transition-delay: 20ms;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
+}
+.cardMedia.fullscreen .videoControls {
+  top: unset;
+}
+.cardMedia video:hover {
+  cursor: pointer;
+}
+.cardMedia.fullscreen video {
+  object-fit: cover;
+  height: 100%;
+  height: 100vh;
+}
+.cardMedia.fullscreen .fullscreenButton {
+  right: 1.5em;
+}
+.fullscreenButton {
+  right: 1em;
+  position: absolute;
+}
+.videoPlayButton {
+  left: 1.5em;
 }
 .cardMedia:hover .videoControls {
   opacity: 1;
